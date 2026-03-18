@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tulip Coffee · view cart & all products</title>
+  <!-- Tailwind via CDN + subtle custom classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 6 (professional icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    .slide-transition { transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .card-hover { transition: all 0.25s ease; }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 25px 30px -12px rgba(0,0,0,0.2); }
+    .input-focus-ring { transition: border 0.15s, box-shadow 0.15s; }
+    .input-focus-ring:focus { border-color: #b27c4a; box-shadow: 0 0 0 4px rgba(62, 30, 0, 0.15); outline: none; }
+    .modal-overlay { background-color: rgba(23, 15, 9, 0.7); backdrop-filter: blur(4px); }
+    .cart-modal-overlay { background-color: rgba(10, 7, 5, 0.75); backdrop-filter: blur(5px); }
+    .spinner { border: 3px solid #eadbcb; border-top: 3px solid #8b5f3c; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* custom scroll for cart */
+    .cart-scroll { max-height: 350px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #b99c82 #f1e7df; }
+    .cart-scroll::-webkit-scrollbar { width: 6px; }
+    .cart-scroll::-webkit-scrollbar-track { background: #f1e7df; border-radius: 10px; }
+    .cart-scroll::-webkit-scrollbar-thumb { background: #b99c82; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-[#f6f2ed] text-[#2e241f] font-sans antialiased">
+
+  <!-- ========== NAVBAR (PROFESSIONAL, WITH CART DETAILS LINK) ========== -->
+  <nav class="bg-white/90 backdrop-blur-sm border-b border-[#e2d9d0] sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
+      <!-- logo -->
+      <a href="#" class="text-2xl font-semibold tracking-tight flex items-center gap-3 text-[#3e2c1c]">
+        <i class="fa-solid fa-mug-hot text-[#9b6e42] text-3xl"></i>
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#4f3a27] to-[#7b5a3a]">Tulip Coffee</span>
+      </a>
+      
+      <!-- nav links -->
+      <ul class="hidden md:flex space-x-10 text-[#3b3229] font-medium">
+        <li><a href="#" class="hover:text-[#9b6e42] transition flex items-center gap-2 border-b-2 border-transparent hover:border-[#9b6e42] pb-1"><i class="fa-regular fa-compass"></i>Home</a></li>
+        <li><a href="#products" class="hover:text-[#9b6e42] transition flex items-center gap-2 border-b-2 border-transparent hover:border-[#9b6e42] pb-1"><i class="fa-solid fa-leaf"></i>Coffee</a></li>
+        <li><a href="#footer" class="hover:text-[#9b6e42] transition flex items-center gap-2 border-b-2 border-transparent hover:border-[#9b6e42] pb-1"><i class="fa-regular fa-building"></i>Contact</a></li>
+      </ul>
+
+      <!-- cart widget with click to view cart detail -->
+      <div class="relative cursor-pointer group" id="cartWidget">
+        <div class="flex items-center gap-1 bg-[#f3ede7] py-2 px-4 rounded-full border border-[#dccfc2] hover:bg-white transition shadow-sm">
+          <i class="fa-solid fa-bag-shopping text-[#7b5a3a] text-xl"></i>
+          <span class="font-semibold text-[#3e2c1c]" id="cart-count">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== HERO SLIDESHOW ========== -->
+  <div class="max-w-7xl mx-auto mt-8 px-4 lg:px-8">
+    <div class="relative w-full h-[440px] rounded-2xl overflow-hidden shadow-2xl border border-white/30">
+      <div id="slidesContainer" class="flex slide-transition h-full" style="transform: translateX(0%);">
+        <!-- slide 1 -->
+        <div class="min-w-full h-full bg-cover bg-center" style="background-image: linear-gradient(95deg, rgba(30,20,12,0.35), rgba(20,14,8,0.2)), url(MatchaStrawberry.png)">
+          <div class="h-full flex items-end p-12 text-white">
+            <div class="max-w-xl">
+              <span class="text-sm uppercase tracking-[0.3em] font-light bg-black/30 px-4 py-2 rounded-full">So good</span>
+              <h2 class="text-5xl font-bold mt-4 leading-tight">bestseller<br>since 2025</h2>
+            </div>
+          </div>
+        </div>
+        <!-- slide 2 -->
+        <div class="min-w-full h-full bg-cover bg-center" style="background-image: linear-gradient(95deg, rgba(30,20,12,0.35), rgba(20,14,8,0.2)), url('https://images.pexels.com/photos/905485/pexels-photo-905485.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');">
+          <div class="h-full flex items-end p-12 text-white">
+            <div class="max-w-xl">
+              <span class="text-sm uppercase tracking-[0.3em] font-light bg-black/30 px-4 py-2 rounded-full">single origin</span>
+              <h2 class="text-5xl font-bold mt-4">Perfect espresso</h2>
+              <p class="text-xl font-light mt-2">floral · citrus · honey</p>
+            </div>
+          </div>
+        </div>
+        <!-- slide 3 -->
+        <div class="min-w-full h-full bg-cover bg-center" style="background-image: linear-gradient(95deg, rgba(30,20,12,0.35), rgba(20,14,8,0.2)), url('https://images.pexels.com/photos/683039/pexels-photo-683039.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');">
+          <div class="h-full flex items-end p-12 text-white">
+            <div class="max-w-xl">
+              <span class="text-sm uppercase tracking-[0.3em] font-light bg-black/30 px-4 py-2 rounded-full">perfect espresso</span>
+              <h2 class="text-5xl font-bold mt-4">Dark roast<br>for true lovers</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- dots -->
+      <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <button class="slide-dot w-2.5 h-2.5 rounded-full bg-white/60 hover:bg-white transition-all" data-index="0"></button>
+        <button class="slide-dot w-2.5 h-2.5 rounded-full bg-white/60 hover:bg-white transition-all" data-index="1"></button>
+        <button class="slide-dot w-2.5 h-2.5 rounded-full bg-white/60 hover:bg-white transition-all" data-index="2"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PRODUCT SECTION (ALL PRODUCTS) ========== -->
+  <section id="products" class="max-w-7xl mx-auto px-4 lg:px-8 py-20">
+    <div class="text-center mb-14">
+      <span class="text-[#9b6e42] font-semibold tracking-widest text-sm">CURATED SELECTION</span>
+      <h2 class="text-4xl md:text-5xl font-light text-[#2e241f] mt-3">Coffee and Matcha</h2>
+      <div class="w-24 h-0.5 bg-[#d4b28c] mx-auto mt-4"></div>
+    </div>
+
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 auto-rows-fr">
+      <!-- products will be injected via js -->
+    </div>
+  </section>
+
+  <!-- ========== MODAL: PRODUCT DETAIL ========== -->
+  <div id="detailModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-2xl border border-[#ede3d9] overflow-hidden">
+      <div class="relative h-64 bg-cover bg-center" id="modalImage" style="background-image: url('')">
+        <button id="closeModalBtn" class="absolute top-5 right-5 bg-white/80 text-[#3e2c1c] w-10 h-10 rounded-full hover:bg-white shadow-md transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+      </div>
+      <div class="p-8">
+        <h3 id="modalTitle" class="text-3xl font-semibold text-[#2e241f]">Product</h3>
+        <p id="modalDesc" class="text-[#5f5348] mt-3 text-base leading-relaxed"></p>
+        <div class="flex items-center justify-between mt-8 pt-4 border-t border-[#ece1d6]">
+          <span id="modalPrice" class="text-4xl font-light text-[#9b6e42]">$0.00</span>
+          <button id="modalAddToCartBtn" class="bg-[#2e241f] hover:bg-[#4f3a2a] text-white text-lg px-8 py-3 rounded-full flex items-center gap-3 shadow-md transition"><i class="fa-solid fa-bag-shopping"></i> add to cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CART DETAIL MODAL (shows all products, quantities, total) ========== -->
+  <div id="cartDetailModal" class="fixed inset-0 cart-modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="bg-white max-w-2xl w-full rounded-2xl shadow-2xl border border-[#e2d4c5]">
+      <div class="p-8 lg:p-10">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl lg:text-3xl font-light text-[#2e241f] flex items-center gap-3"><i class="fa-solid fa-cart-shopping text-[#9b6e42]"></i> your cart</h3>
+          <button id="closeCartModalBtn" class="text-[#8b7a6b] hover:text-[#2e241f] text-3xl leading-none">&times;</button>
+        </div>
+        
+        <!-- cart items list (dynamic) -->
+        <div id="cartItemsContainer" class="cart-scroll pr-2 mb-6">
+          <!-- will be filled by js -->
+        </div>
+        
+        <!-- total and actions -->
+        <div class="border-t border-[#ece1d6] pt-5 mt-2 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <span class="text-2xl font-light text-[#2e241f]">total: <span id="cartTotalAmount" class="font-semibold text-[#9b6e42]">$0.00</span></span>
+          <div class="flex gap-3">
+            <button id="continueShoppingBtn" class="border border-[#d4bfab] hover:bg-[#f3ede7] text-[#2e241f] px-6 py-3 rounded-full text-sm font-medium transition">continue shopping</button>
+            <button id="checkoutFromCartBtn" class="bg-[#2e241f] hover:bg-[#4f3a2a] text-white px-8 py-3 rounded-full text-sm font-medium transition flex items-center gap-2"><i class="fa-regular fa-credit-card"></i> checkout</button>
+          </div>
+        </div>
+        <p class="text-xs text-[#8b7a6b] mt-4 text-center">click checkout to enter delivery details</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ORDER FORM MODAL ========== -->
+  <div id="orderFormModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="bg-white max-w-2xl w-full rounded-2xl shadow-2xl border border-[#ede3d9] max-h-[90vh] overflow-y-auto">
+      <div class="p-8 lg:p-10">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl lg:text-3xl font-light text-[#2e241f] flex items-center gap-3"><i class="fa-regular fa-pen-to-square text-[#9b6e42]"></i>complete order</h3>
+          <button id="closeOrderFormBtn" class="text-[#8b7a6b] hover:text-[#2e241f] text-3xl leading-none">&times;</button>
+        </div>
+        <p class="text-[#5f5348] mb-8 pb-2 border-b border-[#ece1d6] flex items-center gap-2">
+          <i class="fa-solid fa-cube text-[#b27c4a]"></i> <span id="orderProductSummary" class="font-medium">Your cart items</span>
+        </p>
+        
+        <form id="orderDetailsForm">
+          <!-- we no longer need hidden product id, we'll send whole cart -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="col-span-2 md:col-span-1">
+              <label class="block text-[#4f3a2a] text-sm font-medium mb-2 flex items-center gap-1"><i class="fa-regular fa-user"></i> Full name <span class="text-[#b27c4a]">*</span></label>
+              <input type="text" id="custName" required class="w-full px-5 py-4 rounded-xl border border-[#dbcfc2] input-focus-ring bg-white text-[#2e241f]" placeholder="John Smith">
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <label class="block text-[#4f3a2a] text-sm font-medium mb-2 flex items-center gap-1"><i class="fa-regular fa-phone"></i> Phone <span class="text-[#b27c4a]">*</span></label>
+              <input type="tel" id="custPhone" required class="w-full px-5 py-4 rounded-xl border border-[#dbcfc2] input-focus-ring bg-white" placeholder="+855 12 345 678">
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[#4f3a2a] text-sm font-medium mb-2 flex items-center gap-1"><i class="fa-regular fa-building"></i> Delivery address <span class="text-[#b27c4a]">*</span></label>
+              <textarea id="custAddress" required rows="2" class="w-full px-5 py-4 rounded-xl border border-[#dbcfc2] input-focus-ring bg-white" placeholder="Street, building, etc."></textarea>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[#4f3a2a] text-sm font-medium mb-2 flex items-center gap-1"><i class="fa-regular fa-note-sticky"></i> Additional notes</label>
+              <input type="text" id="custNotes" class="w-full px-5 py-4 rounded-xl border border-[#dbcfc2] input-focus-ring bg-white" placeholder="e.g., prefer morning delivery">
+            </div>
+          </div>
+
+          <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <button type="submit" id="submitOrderBtn" class="bg-[#2e241f] hover:bg-[#4f3a2a] text-white text-lg px-8 py-4 rounded-full flex-1 flex items-center justify-center gap-3 shadow-md transition font-medium"><i class="fa-brands fa-telegram"></i> confirm & send to telegram</button>
+            <button type="button" id="cancelOrderBtn" class="bg-white border border-[#dbcfc2] hover:bg-[#f7f1eb] text-[#2e241f] text-lg px-8 py-4 rounded-full transition font-medium">cancel</button>
+          </div>
+          <div id="formFeedback" class="mt-5 text-sm text-center min-h-[2rem]"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer id="footer" class="bg-[#1d1611] text-[#d9cdc1] border-t border-[#3e2e21]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div>
+        <h4 class="text-2xl font-light flex items-center gap-3 mb-4"><i class="fa-solid fa-mug-hot text-[#b9926c]"></i> <span class="text-white/90">Tulip Coffee</span></h4>
+        <p class="text-[#b1a69b] text-sm leading-relaxed">Roastery & café since 2025. ethically sourced, small batch.</p>
+        <div class="flex space-x-5 mt-6 text-2xl text-[#b1a69b]">
+          <a href="#" class="hover:text-white transition"><i class="fa-brands fa-telegram"></i></a>
+          <a href="#" class="hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="hover:text-white transition"><i class="fa-regular fa-envelope"></i></a>
+        </div>
+      </div>
+      <div>
+        <h5 class="text-white/90 font-medium text-lg mb-5">explore</h5>
+        <ul class="space-y-3 text-[#b1a69b]">
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> our story</a></li>
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> wholesale</a></li>
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> locations</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="text-white/90 font-medium text-lg mb-5">support</h5>
+        <ul class="space-y-3 text-[#b1a69b]">
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> contact</a></li>
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> shipping & returns</a></li>
+          <li><a href="#" class="hover:text-white flex items-center gap-2"><i class="fa-regular fa-circle-right text-xs"></i> FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="text-white/90 font-medium text-lg mb-5">telegram bot</h5>
+        <div class="bg-[#2b221b] p-5 rounded-xl border border-[#4d3b2b]">
+          <p class="text-sm text-[#c9bbae]">🤖 <span class="font-mono text-[#e2d4c8]">@tulipcoffeebot</span><br>direct orders</p>
+          <div class="flex mt-3 text-[#b9926c] text-sm items-center gap-2"><i class="fa-brands fa-telegram text-lg"></i> <span>@tulipcoffeebot</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-[#3e2e21] py-6 text-center text-[#8e7e6f] text-sm">© 2026 Tulip Coffee — professional brewing since day one.</div>
+  </footer>
+
+  <script>
+    (function() {
+      // ---------- CONFIG ----------
+      const TELEGRAM_TOKEN = "8629814401:AAELy4uK8UGF6-8I7HoBebf76ndoOqlhe90";
+      const CHAT_ID = "928058888";
+
+      // ---------- PRODUCT DATA ----------
+      const products = [
+        { id: 1, name: "Ice Latte", description: "Floral, citrus, wild honey · light roast", price: 1.25, image: "IceLatte.png", badge: "" },
+        { id: 2, name: "Coffee Cream", description: "Full body, dark chocolate, herbs · dark roast", price: 1.50, image: "CoffeeCream.png", badge: "" },
+        { id: 3, name: "Coffee Coconut Cream", description: "Caramel, nuts, balanced · medium roast", price: 1.50, image: "CafeCoconut.png", badge: "new" },
+        { id: 4, name: "Matcha Coconut Cream", description: "Blackcurrant, winey, complex · light/medium", price: 1.50, image: "MatchaCocount.png", badge: "" },
+        { id: 5, name: "Matcha Latte", description: "Chocolate, cinnamon, smooth · medium roast", price: 1.25, image: "Matcha.png", badge: null },
+        { id: 6, name: "Matcha Strawberry", description: "Sugar cane, almond · swiss water", price: 1.25, image: "MatchaStrawberry.png", badge: "bestseller" },
+        { id: 7, name: "Passion Cream", description: "Sugar cane, almond · swiss water", price: 1.50, image: "PassionCream.png", badge: "limited" },
+        { id: 7, name: "Strawberry Soda", description: "Sugar cane, almond · swiss water", price: 1.25, image: "StrawberrySoda.png", badge: "" },
+        { id: 7, name: "GreenTea Frappe", description: "Sugar cane, almond · swiss water", price: 1.50, image: "GreenTeaFrappe.png", badge: "" }
+      ];
+
+      // ---------- CART (array of objects with quantity) ----------
+      let cart = []; // each item: { id, name, price, quantity }
+
+      // DOM elements
+      const grid = document.getElementById('productGrid');
+      const cartCountSpan = document.getElementById('cart-count');
+      const detailModal = document.getElementById('detailModal');
+      const cartDetailModal = document.getElementById('cartDetailModal');
+      const orderModal = document.getElementById('orderFormModal');
+      const modalImg = document.getElementById('modalImage');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const modalPrice = document.getElementById('modalPrice');
+      const modalAddBtn = document.getElementById('modalAddToCartBtn');
+      const closeDetailBtn = document.getElementById('closeModalBtn');
+      const closeCartBtn = document.getElementById('closeCartModalBtn');
+      const closeOrderBtn = document.getElementById('closeOrderFormBtn');
+      const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+      const orderSummarySpan = document.getElementById('orderProductSummary');
+      const orderForm = document.getElementById('orderDetailsForm');
+      const formFeedback = document.getElementById('formFeedback');
+      const cartItemsContainer = document.getElementById('cartItemsContainer');
+      const cartTotalSpan = document.getElementById('cartTotalAmount');
+      const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+      const checkoutFromCartBtn = document.getElementById('checkoutFromCartBtn');
+
+      // ---------- HELPER: update cart counter and re-render cart modal if open
+      function updateCartUI() {
+        const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+        cartCountSpan.innerText = totalItems;
+        if (!cartDetailModal.classList.contains('hidden')) {
+          renderCartModal();
+        }
+      }
+
+      // render cart modal with all products, quantities, total
+      function renderCartModal() {
+        if (!cartItemsContainer) return;
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = '<div class="text-center py-12 text-[#8b7a6b]"><i class="fa-regular fa-face-smile text-5xl mb-4 opacity-40"></i><p>your cart is empty</p></div>';
+          cartTotalSpan.innerText = '$0.00';
+          return;
+        }
+        let html = '';
+        let total = 0;
+        cart.forEach((item, index) => {
+          const subtotal = item.price * item.quantity;
+          total += subtotal;
+          html += `
+            <div class="flex items-center justify-between py-4 border-b border-[#ece1d6] last:border-0">
+              <div class="flex-1">
+                <h4 class="font-medium text-[#2e241f]">${item.name}</h4>
+                <p class="text-sm text-[#7b6b5c]">$${item.price.toFixed(2)} each</p>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center border border-[#d4bfab] rounded-full overflow-hidden bg-white">
+                  <button class="qty-decrease px-3 py-1 text-[#9b6e42] hover:bg-[#f3ede7] font-bold text-lg" data-id="${item.id}">−</button>
+                  <span class="w-8 text-center font-medium">${item.quantity}</span>
+                  <button class="qty-increase px-3 py-1 text-[#9b6e42] hover:bg-[#f3ede7] font-bold text-lg" data-id="${item.id}">+</button>
+                </div>
+                <span class="w-16 text-right font-medium text-[#2e241f]">$${subtotal.toFixed(2)}</span>
+                <button class="remove-item text-[#b1624d] hover:text-[#8b3c2c] ml-2" data-id="${item.id}"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+            </div>
+          `;
+        });
+        cartItemsContainer.innerHTML = html;
+        cartTotalSpan.innerText = `$${total.toFixed(2)}`;
+
+        // attach event listeners for +/-/remove
+        document.querySelectorAll('.qty-decrease').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const item = cart.find(i => i.id === id);
+            if (item) {
+              if (item.quantity > 1) {
+                item.quantity -= 1;
+              } else {
+                cart = cart.filter(i => i.id !== id);
+              }
+              updateCartUI();
+            }
+          });
+        });
+        document.querySelectorAll('.qty-increase').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const item = cart.find(i => i.id === id);
+            if (item) {
+              item.quantity += 1;
+              updateCartUI();
+            }
+          });
+        });
+        document.querySelectorAll('.remove-item').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+          });
+        });
+      }
+
+      // add product to cart (increment quantity)
+      function addToCart(product) {
+        const existing = cart.find(item => item.id === product.id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cart.push({ 
+            id: product.id, 
+            name: product.name, 
+            price: product.price,
+            quantity: 1 
+          });
+        }
+        updateCartUI();
+      }
+
+      // ---------- RENDER PRODUCTS ----------
+      function renderProducts() {
+        grid.innerHTML = '';
+        products.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-2xl shadow-sm border border-[#eee7e0] overflow-hidden card-hover flex flex-col';
+          card.innerHTML = `
+            <div class="h-56 bg-cover bg-center relative" style="background-image: url('${p.image}');">
+              ${p.badge ? `<span class="absolute top-5 right-5 bg-[#2e241f]/80 text-white text-xs font-medium px-4 py-2 rounded-full uppercase tracking-wider backdrop-blur-sm">${p.badge}</span>` : ''}
+            </div>
+            <div class="p-7 flex flex-col flex-1">
+              <h3 class="text-2xl font-medium text-[#2e241f]">${p.name}</h3>
+              <p class="text-[#6d6258] text-sm mt-2 flex-1">${p.description}</p>
+              <div class="flex items-center justify-between mt-6">
+                <span class="text-3xl font-light text-[#9b6e42]">$${p.price.toFixed(2)}</span>
+                <div class="space-x-2">
+                  <button class="detail-btn bg-[#f3ede7] hover:bg-[#e2d7cd] text-[#2e241f] px-5 py-3 rounded-full text-sm font-medium transition inline-flex items-center gap-2" data-id="${p.id}"><i class="fa-regular fa-eye"></i> detail</button>
+                  <button class="cart-btn bg-[#2e241f] hover:bg-[#4f3a2a] text-white px-5 py-3 rounded-full text-sm font-medium transition inline-flex items-center gap-2 shadow-sm" data-id="${p.id}"><i class="fa-solid fa-bag-shopping"></i> add</button>
+                </div>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+        document.querySelectorAll('.detail-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const prod = products.find(p => p.id === id);
+            if (prod) showDetailModal(prod);
+          });
+        });
+        document.querySelectorAll('.cart-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const prod = products.find(p => p.id === id);
+            if (prod) {
+              addToCart(prod);
+              // optional micro feedback
+              formFeedback.innerHTML = `<span class="text-sm text-[#3f7a5c]">✓ added ${prod.name}</span>`;
+              setTimeout(() => formFeedback.innerHTML = '', 1500);
+            }
+          });
+        });
+      }
+
+      // detail modal
+      function showDetailModal(prod) {
+        modalImg.style.backgroundImage = `url('${prod.image}')`;
+        modalTitle.innerText = prod.name;
+        modalDesc.innerText = prod.description;
+        modalPrice.innerText = `$${prod.price.toFixed(2)}`;
+        detailModal.classList.remove('hidden');
+        detailModal.classList.add('flex');
+        modalAddBtn.onclick = () => {
+          addToCart(prod);
+          detailModal.classList.add('hidden');
+        };
+      }
+      closeDetailBtn.addEventListener('click', () => detailModal.classList.add('hidden'));
+      detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.add('hidden'); });
+
+      // cart modal open/close
+      document.getElementById('cartWidget').addEventListener('click', () => {
+        renderCartModal();
+        cartDetailModal.classList.remove('hidden');
+        cartDetailModal.classList.add('flex');
+      });
+      closeCartBtn.addEventListener('click', () => cartDetailModal.classList.add('hidden'));
+      continueShoppingBtn.addEventListener('click', () => cartDetailModal.classList.add('hidden'));
+      window.addEventListener('click', (e) => {
+        if (e.target === cartDetailModal) cartDetailModal.classList.add('hidden');
+      });
+
+      // checkout from cart -> open order form
+      checkoutFromCartBtn.addEventListener('click', () => {
+        if (cart.length === 0) {
+          alert('your cart is empty');
+          return;
+        }
+        cartDetailModal.classList.add('hidden');
+        // open order form, update summary
+        orderSummarySpan.innerText = `You have ${cart.reduce((a,i)=>a+i.quantity,0)} item(s) in cart`;
+        // reset form fields
+        ['custName','custPhone','custAddress','custNotes'].forEach(id => document.getElementById(id).value = '');
+        formFeedback.innerHTML = '';
+        orderModal.classList.remove('hidden');
+        orderModal.classList.add('flex');
+      });
+
+      // order modal close
+      closeOrderBtn.addEventListener('click', () => orderModal.classList.add('hidden'));
+      cancelOrderBtn.addEventListener('click', () => orderModal.classList.add('hidden'));
+      orderModal.addEventListener('click', (e) => { if (e.target === orderModal) orderModal.classList.add('hidden'); });
+
+      // ---------- SUBMIT ORDER (full cart) ----------
+      orderForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const address = document.getElementById('custAddress').value.trim();
+        const notes = document.getElementById('custNotes').value.trim() || '—';
+        if (!name || !phone || !address) {
+          formFeedback.innerHTML = '<span class="text-[#b1624d] font-medium">❌ name, phone, address required</span>';
+          return;
+        }
+        if (cart.length === 0) {
+          formFeedback.innerHTML = '<span class="text-[#b1624d]">cart is empty</span>';
+          return;
+        }
+
+        const submitBtn = document.getElementById('submitOrderBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner mr-2"></span> sending...';
+
+        // build cart lines
+        let cartLines = '';
+        let totalAmount = 0;
+        cart.forEach(item => {
+          const sub = item.price * item.quantity;
+          totalAmount += sub;
+          cartLines += `• ${item.name} x${item.quantity} — $${sub.toFixed(2)}\n`;
+        });
+
+        const message = `🧾 *NEW FULL ORDER from Tulip.coffee*
+👤 *Name:* ${name}
+📞 *Phone:* ${phone}
+📍 *Address:* ${address}
+📝 *Notes:* ${notes}
+
+🛒 *CART DETAILS:*
+${cartLines}
+💰 *TOTAL: $${totalAmount.toFixed(2)}*
+
+_Thank you, we'll contact you soon._`;
+
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          if (data.ok) {
+            formFeedback.innerHTML = '<span class="text-[#3f7a5c] font-medium">✓ order sent! thank you.</span>';
+            // clear cart after successful order
+            cart = [];
+            updateCartUI();
+            setTimeout(() => { 
+              orderModal.classList.add('hidden'); 
+              formFeedback.innerHTML = ''; 
+            }, 1500);
+          } else {
+            formFeedback.innerHTML = `<span class="text-[#b1624d]">✗ telegram error: ${data.description}</span>`;
+          }
+        } catch (err) {
+          formFeedback.innerHTML = `<span class="text-[#b1624d]">network error</span>`;
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      });
+
+      // ---------- SLIDESHOW ----------
+      const slidesContainer = document.getElementById('slidesContainer');
+      const dots = document.querySelectorAll('.slide-dot');
+      let currentSlide = 0;
+      const totalSlides = 3;
+      function goToSlide(index) {
+        slidesContainer.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => {
+          if (i === index) dot.classList.add('bg-white', 'scale-125');
+          else dot.classList.remove('bg-white', 'scale-125');
+        });
+        currentSlide = index;
+      }
+      dots.forEach((dot, idx) => dot.addEventListener('click', () => goToSlide(idx)));
+      setInterval(() => { goToSlide((currentSlide + 1) % totalSlides); }, 5000);
+      goToSlide(0);
+
+      // ---------- INIT ----------
+      renderProducts();
+      updateCartUI();
+      // silent ping
+      setTimeout(() => { fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=☕ Tulip cart detail view ready&parse_mode=Markdown`).catch(()=>{}); }, 2000);
+    })();
+  </script>
+</body>
+</html>
